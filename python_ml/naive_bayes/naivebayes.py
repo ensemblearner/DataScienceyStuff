@@ -1,26 +1,24 @@
-import operator
-from collections import Counter
-import math
-import os
-import numpy as np
 """
 Needs further refactoring
 v0.3
 09/28/2013
 Author: Mohitdeep Singh
 """
+import operator
+from collections import Counter
+import math
+import os
+import numpy as np
 
 
 class NaiveBayes:
-    def __init__(self,dictionary = "data/dict.txt"):
+    def __init__(self,dictionary="data/dict.txt"):
         self._vector_list = self.__load_dictionary(dictionary)
-        self.feature_vector = np.ones(len(self._vector_list),float)
-
-
+        self.feature_vector = np.ones(len(self._vector_list), float)
 
     def __load_dictionary(self, filename):
-        f = open(filename,"r")
-        vector_list = sorted([ line.rstrip(os.linesep) for line in f])
+        f = open(filename, "r")
+        vector_list = sorted([line.rstrip(os.linesep) for line in f])
         #print "Dictionary loaded!"
         return vector_list
 
@@ -33,7 +31,7 @@ class NaiveBayes:
             freqs = Counter(document.split())
             for word, frequency in freqs.items():
                 index = self._vector_list.index(word.lower())
-                feature_vector[index] +=  float(frequency)
+                feature_vector[index] += float(frequency)
         self.feature_vector_dict = feature_vector_dict
         self.__normalize_likelihood_vector()
 
@@ -47,7 +45,7 @@ class NaiveBayes:
                 probs[label] += math.log(self.feature_vector_dict[label][index])
         return probs
 
-    def naive_bayes(test_document,priors,likelihood_dict,wordlist):
+    def naive_bayes(test_document,priors,likelihood_dict, wordlist):
         probs = priors.copy()
         for k,v in probs.items():
             probs[k] = math.log(v)
@@ -66,11 +64,12 @@ class NaiveBayes:
         return {label: self.feature_vector.copy() for label in unique_labels}
 
     def __assign_class_priors(self, labels):
-        self.priors =  Counter(labels)
+        self.priors = Counter(labels)
 
     def __normalize_likelihood_vector(self):
         for label, feature_vector in self.feature_vector_dict.items():
             self.feature_vector_dict[label] = feature_vector/len(feature_vector)
+
 
 def main():
 
@@ -83,10 +82,6 @@ def main():
                  "click on the link"
     ]
     labels = ["ham","ham","ham","ham","spam","spam","spam"]
-
-
-
-    #----------------------------------------
     nb = NaiveBayes()
     nb.train(documents,labels)
     #print nb.feature_vector_dict
