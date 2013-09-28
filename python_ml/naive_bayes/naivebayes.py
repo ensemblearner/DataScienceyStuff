@@ -45,16 +45,6 @@ class NaiveBayes:
                 probs[label] += math.log(self.feature_vector_dict[label][index])
         return probs
 
-    def naive_bayes(test_document,priors,likelihood_dict, wordlist):
-        probs = priors.copy()
-        for k,v in probs.items():
-            probs[k] = math.log(v)
-        for word in test_document.split():
-            for label in priors.keys():
-                index = wordlist.index(word.lower())
-                probs[label] += math.log(likelihood_dict[label][index])
-        return probs
-
     def get_class(self,prob_dict):
         return sorted(prob_dict.iteritems(), key=operator.itemgetter(1), reverse=True)[0]
 
