@@ -1,75 +1,81 @@
 import operator
-
-__author__ = 'Mohitdeep Singh'
-from collections import defaultdict
 from collections import Counter
 import math
-
+import os
+import numpy as np
 """
-Code to be refactored.
-Initial commit!
+Needs further refactoring
+v0.2
+09/28/2013
+Author: Mohitdeep Singh
 """
 
-def create_word_vector(document,label, vector_space,total_words):
-
-    for word in document.split():
-        if word not in total_words: total_words.append(word)
-        if label in vector_space and word in vector_space[label]:
-            vector_space[label][word] +=1
-        else:
-            vector_space[label][word] = 1
+def load_dictionary(filename="data/dict.txt"):
+    f = open(filename,"r")
+    vector_list = sorted([ line.rstrip(os.linesep) for line in f])
+    return np.ones(len(vector_list),float),vector_list
+    #return np.array([1.0/len(vector_list)]*len(vector_list),float),vector_list
 
 
 
-def normalize_dict(dictionary,words= None):
-    if words:
-        vocab_cardinality = len(words)
-        for word in words:
-            if word not in dictionary:
-                dictionary[word] = 1.0 / vocab_cardinality
-    summation = sum(dictionary.values())
-    for k,v in dictionary.items():
-        dictionary[k] = v/float(summation)
+def generate_likelihood_distributions(document,label,feature_vectors, vector_list):
+    feature_vector = feature_vectors[label]
+    freqs = Counter(document.split())
+    for word, frequency in freqs.items():
+        index = vector_list.index(word.lower())
+        feature_vector[index] +=  float(frequency)
 
+
+def normalize_likelihood_vector(feature_vector):
+    return feature_vector/len(feature_vector)
 
 def assign_class_priors(labels):
     return Counter(labels)
 
-def naive_bayes(priors,likhoods,words):
+def naive_bayes(document,priors,likelihood_dict,wordlist):
     probs = priors.copy()
-    #print probs
     for k,v in probs.items():
         probs[k] = math.log(v)
-    #print probs
-    for word in words:
+    for word in document.split():
         for label in priors.keys():
-            probs[label] += math.log(likhoods[label][word])
-            #probs[label] *=likhoods[label][word]
+            index = wordlist.index(word.lower())
+            probs[label] += math.log(likelihood_dict[label][index])
     return probs
-def get_class(prob_dict):
-    return sorted(prob_dict.iteritems(), key=operator.itemgetter(1),reverse=True)[0]
 
+def get_class(prob_dict):
+    return sorted(prob_dict.iteritems(), key=operator.itemgetter(1), reverse=True)[0]
+
+
+
+"""
+Main code starts from here!
+"""
 
 documents = ["This is awesome",
-            "This is so cool email",
-            "I won a lottery",
-            "click to find more information",
-            "lottery is send email",
-            "win lottery here",
-            "click on the link"
-            ]
+             "This is so cool email",
+             "I won a lottery",
+             "click to find more information",
+             "lottery is send email",
+             "win lottery here",
+             "click on the link"
+]
 labels = ["ham","ham","ham","ham","spam","spam","spam"]
-data_dict = defaultdict(list)
-likhood = defaultdict(dict)
-total_words = []
-for label,document in zip(labels,documents):
-    data_dict[label].append( create_word_vector(document,label, likhood,total_words) )
 
-for label, feature in likhood.items():
-    normalize_dict(feature,total_words)
-#print likhood
-priors =  assign_class_priors(labels)
-normalize_dict(priors)
-#print priors
-posterior =  naive_bayes(priors, likhood, "click link lottery".split())
-print get_class(posterior)
+
+feature_vector, vector_list = load_dictionary()
+unique_labels = list(set(labels))
+feature_vector_dict = {label: feature_vector.copy() for label in unique_labels}
+
+for label,document in zip(labels,documents):
+    generate_likelihood_distributions(document,label,feature_vector_dict,vector_list)
+
+for label, feature_vector in feature_vector_dict.items():
+    feature_vector_dict[label] = normalize_likelihood_vector(feature_vector)
+
+priors = assign_class_priors(labels)
+
+test_string = "amazing information"
+posteriors =  naive_bayes(test_string,priors,feature_vector_dict,vector_list)
+print "prediction for ", test_string
+print posteriors
+print get_class(posteriors)
