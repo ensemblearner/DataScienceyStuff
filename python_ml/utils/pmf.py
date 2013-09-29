@@ -1,4 +1,4 @@
-__author__ = 'mohitdee'
+__author__ = 'Mohitdeep Singh'
 
 class Pmf(object):
     def __init__(self, d=None):
@@ -36,5 +36,7 @@ print pmf.pmf
 pmf.normalize()
 print pmf.pmf
 pmf.remove(2)
+print pmf.pmf
+pmf.remove(60)
 print pmf.pmf
 """
