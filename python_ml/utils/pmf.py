@@ -26,7 +26,7 @@ class Pmf(object):
     def remove(self, key):
 
         self.pmf.pop(key, None)
-        self.normalize()
+        if self.normalized: self.normalize()
 
 """
 pmf = Pmf()
