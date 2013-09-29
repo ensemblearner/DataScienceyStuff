@@ -1,8 +1,8 @@
 __author__ = 'Mohitdeep Singh'
 
 class Pmf(object):
+    
     def __init__(self, d=None):
-
         self.pmf = d if d else {}
         self.normalized = False
 
@@ -13,9 +13,8 @@ class Pmf(object):
     def get_prob(self, key):
         return self.pmf.get(key, 0)
 
-    def set_value(self, keys):
-        for key in keys:
-            self.pmf[key] = self.pmf.get(key, 0) + 1
+    def set_values(self, keys):
+        self.create_pmf(keys)
 
     def normalize(self):
         total = sum(self.pmf.values())
@@ -24,7 +23,6 @@ class Pmf(object):
         self.normalized = True
 
     def remove(self, key):
-
         self.pmf.pop(key, None)
         if self.normalized: self.normalize()
 
